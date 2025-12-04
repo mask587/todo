@@ -1,4 +1,4 @@
-name: Build Flutter APK
+name: Build Flutter APK from ZIP
 
 on:
   push:
@@ -10,31 +10,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ Checkout repo
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # 2️⃣ Set up Flutter
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.13.0' # replace with your Flutter version
+        flutter-version: '3.13.0' # change to your Flutter version
 
-    - name: Extract ZIP
-      run: unzip -o todoapp.zip
+    # 3️⃣ Extract ZIP
+    - name: Extract project ZIP
+      run: |
+        unzip -o todoapp.zip
+        echo "Listing extracted files:"
+        ls -la
 
-    - name: Change directory to project
-      run: cd todo_app
+    # 4️⃣ Detect project folder
+    - name: Detect project folder
+      id: detect
+      run: |
+        folder=$(ls -d */ | head -n 1)
+        echo "project_folder=$folder" >> $GITHUB_ENV
+        echo "Detected folder: $folder"
 
+    # 5️⃣ Change directory to project folder
     - name: Install dependencies
-      run: flutter pub get
+      run: |
+        cd ${{ env.project_folder }}
+        flutter pub get
 
+    # 6️⃣ Generate launcher icon (optional)
     - name: Generate app icon
-      run: flutter pub run flutter_launcher_icons:main || echo "No icon to generate"
+      run: |
+        cd ${{ env.project_folder }}
+        flutter pub run flutter_launcher_icons:main || echo "No icon to generate"
 
+    # 7️⃣ Build APK
     - name: Build APK
-      run: flutter build apk --release
+      run: |
+        cd ${{ env.project_folder }}
+        flutter build apk --release
 
+    # 8️⃣ Upload APK artifact
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-release.apk
-        path: todo_app/build/app/outputs/flutter-apk/app-release.apk
+        path: ${{ env.project_folder }}/build/app/outputs/flutter-apk/app-release.apk
