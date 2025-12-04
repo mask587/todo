@@ -14,20 +14,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2️⃣ Set up Flutter
+    # 2️⃣ Set up Flutter (latest stable 3.38.3)
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.13.0' # change to your Flutter version
+        flutter-version: '3.38.3'
 
-    # 3️⃣ Extract ZIP
+    # 3️⃣ Extract project ZIP
     - name: Extract project ZIP
       run: |
         unzip -o todoapp.zip
         echo "Listing extracted files:"
         ls -la
 
-    # 4️⃣ Detect project folder
+    # 4️⃣ Detect project folder automatically
     - name: Detect project folder
       id: detect
       run: |
@@ -35,7 +35,7 @@ jobs:
         echo "project_folder=$folder" >> $GITHUB_ENV
         echo "Detected folder: $folder"
 
-    # 5️⃣ Change directory to project folder
+    # 5️⃣ Install dependencies
     - name: Install dependencies
       run: |
         cd ${{ env.project_folder }}
@@ -47,7 +47,7 @@ jobs:
         cd ${{ env.project_folder }}
         flutter pub run flutter_launcher_icons:main || echo "No icon to generate"
 
-    # 7️⃣ Build APK
+    # 7️⃣ Build release APK
     - name: Build APK
       run: |
         cd ${{ env.project_folder }}
